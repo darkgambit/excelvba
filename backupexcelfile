@@ -1,0 +1,18 @@
+Private Sub copyfile()
+    Dim oFSO As Object
+    Dim sourceFile As String, destinationFolder As String, destinationFile As String
+    
+    'define source file path
+    sourceFile = "source path file folder"
+    
+    'define destination folder path and file name with current date
+    destinationFolder = "destination file path folder\"
+    destinationFile = destinationFolder & Format(Now(), "ddmmyyyy ") & "file name"
+    
+    'create a file system object and copy the file to the destination
+    Set oFSO = CreateObject("Scripting.FileSystemObject")
+    oFSO.copyfile sourceFile, destinationFile
+    
+    'display a message to confirm the file was copied
+    MsgBox "File copied successfully to " & destinationFile
+End Sub
