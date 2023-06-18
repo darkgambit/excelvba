@@ -1,0 +1,15 @@
+Sub Printmanpower()
+    Const MyPrinter As String = "PRINTER NAME:"
+    Dim sCurrentPrinter As String
+
+    sCurrentPrinter = Application.ActivePrinter
+    Application.ActivePrinter = MyPrinter
+    With ActiveWorkbook.Sheets("MANPOWER")
+        .PageSetup.Zoom = False
+        .PageSetup.FitToPagesWide = 1
+        .PageSetup.FitToPagesTall = 1
+        .Range("A1:K21").PrintOut
+    End With
+    Application.ActivePrinter = sCurrentPrinter
+    ActiveWorkbook.Save
+End Sub
