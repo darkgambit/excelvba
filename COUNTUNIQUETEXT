@@ -1,0 +1,13 @@
+'EXCEL UDF Count Consecutive Unique text values (not numbers) in a range
+
+Function COUNTUNIQUETEXT(rng As Range) As Long
+    Dim dict As Object
+    Set dict = CreateObject("Scripting.Dictionary")
+    Dim cell As Range
+    For Each cell In rng
+        If Not IsNumeric(cell.Value) And Not dict.exists(cell.Value) Then
+            dict.Add cell.Value, 1
+        End If
+    Next cell
+    COUNTUNIQUETEXT = dict.Count
+End Function
