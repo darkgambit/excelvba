@@ -1,0 +1,20 @@
+'Extract Multiple File Names in a folder to excel 
+
+Sub ListFilesInFolder()
+    Dim oFSO As Object
+    Dim oFolder As Object
+    Dim oFile As Object
+    Dim i As Integer
+    Dim folderPath As String
+
+    folderPath = "D:\SCANNED FILES\L680\MAINTENANCE\2023"
+
+    Set oFSO = CreateObject("Scripting.FileSystemObject")
+    Set oFolder = oFSO.GetFolder(folderPath)
+
+    i = 1
+    For Each oFile In oFolder.Files
+        Cells(i, 1) = oFile.Name
+        i = i + 1
+    Next oFile
+End Sub
