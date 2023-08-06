@@ -1,0 +1,51 @@
+'ECTRACT SELECTED DATA FROM WORD (WITH HYPERLINK) TO EXCEL. 
+
+Sub ExtractDataFromWordToExcel()
+    Dim wdApp As New Word.Application
+    Dim myDoc As Word.Document
+    Dim myFolder As String, strFile As String
+    Dim myWkSht As Worksheet, i As Long, j As Long
+
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Select the source folder"
+        .ButtonName = "Select"
+        If .Show = -1 Then
+            myFolder = .SelectedItems(1)
+        Else
+            Exit Sub
+        End If
+    End With
+
+    Application.ScreenUpdating = False
+
+    Set myWkSht = ActiveSheet
+    ActiveSheet.Cells.Clear
+    Range("A1") = "Hyperlink"
+    Range("A1").Font.Bold = True
+    Range("B1") = "Name"
+    Range("B1").Font.Bold = True
+
+    i = myWkSht.Cells(myWkSht.Rows.Count, 1).End(xlUp).Row
+    strFile = Dir(myFolder & "\*.docx", vbNormal)
+    While strFile <> ""
+        Set myDoc = wdApp.Documents.Open(Filename:=myFolder & "\" & strFile, AddToRecentFiles:=False, Visible:=False)
+        With myDoc
+            For Each para In .Paragraphs
+                If InStr(para.Range.Text, "Name:") > 0 Then
+                    i = i + 1
+                    myWkSht.Cells(i, 2) = Trim(Mid(para.Range.Text, InStr(para.Range.Text, "Name:") + 5))
+                End If
+                If para.Range.Hyperlinks.Count > 0 Then
+                    myWkSht.Hyperlinks.Add Anchor:=myWkSht.Cells(i, 1), Address:=para.Range.Hyperlinks(1).Address, TextToDisplay:=para.Range.Hyperlinks(1).Address
+                End If
+            Next para
+            myWkSht.Columns.AutoFit
+        End With
+        myDoc.Close SaveChanges:=False
+        strFile = Dir()
+    Wend
+
+    wdApp.Quit
+    Set myDoc = Nothing: Set wdApp = Nothing: Set myWkSht = Nothing
+    Application.ScreenUpdating = True
+End Sub
