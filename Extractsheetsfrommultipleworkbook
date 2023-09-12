@@ -1,0 +1,57 @@
+'Extract Sheets from Multiple workbook then consolidate in a single workbook
+
+Sub getsheets()
+    Dim Path As String
+    Dim Filename As String
+    Dim dialog As FileDialog
+    Dim i As Integer
+    Dim files() As String
+    Dim count As Integer
+    Dim newWorkbook As Workbook
+    Dim saveAsDialog As Variant
+
+    Application.ScreenUpdating = False 'Turn off screen updating
+    Application.Calculation = xlCalculationManual 'Turn off automatic calculation
+
+    Set dialog = Application.FileDialog(msoFileDialogFolderPicker)
+    If dialog.Show = -1 Then
+        Path = dialog.SelectedItems(1)
+    Else
+        Exit Sub 'User pressed Cancel on the dialog
+    End If
+
+    ' Get all filenames and store them in an array
+    Filename = Dir(Path & "\*.xlsx")
+    Do While Filename <> ""
+        count = count + 1
+        ReDim Preserve files(1 To count)
+        files(count) = Filename
+        Filename = Dir()
+    Loop
+
+    ' Create a new workbook and set it as the active workbook
+    Set newWorkbook = Workbooks.Add
+
+    ' Process the files in reverse order
+    For i = count To 1 Step -1
+        Filename = files(i)
+        With Workbooks.Open(Filename:=Path & "\" & Filename, ReadOnly:=True)
+            For Each Sheet In .Sheets
+                Sheet.Copy after:=newWorkbook.Sheets(1)
+            Next Sheet
+            .Close SaveChanges:=False 'Close the workbook without saving changes
+        End With
+    Next i
+
+    MsgBox "The merger has been successfully completed.", vbInformation, "Success"
+
+    ' Prompt the user for a filename before saving the new workbook
+    saveAsDialog = Application.GetSaveAsFilename(FileFilter:="Excel Files (*.xlsx), *.xlsx", Title:="Save As")
+    If saveAsDialog <> False Then
+        newWorkbook.SaveAs Filename:=saveAsDialog, FileFormat:=xlOpenXMLWorkbook 'FileFormat for .xlsx files
+    End If
+
+    Application.ScreenUpdating = True 'Turn on screen updating
+    Application.Calculation = xlCalculationAutomatic 'Turn on automatic calculation
+
+End Sub
