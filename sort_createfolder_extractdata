@@ -1,0 +1,62 @@
+'sort data in column A then create a folder based on the unique value from the sorted data then extract the sorted data and place it in the specific folder
+'
+Sub SortAndExportDataByClass()
+    Dim OriginalSheet As Worksheet
+    Dim NewWorkbook As Workbook
+    Dim NewSheet As Worksheet
+    Dim CurrentCell As Range
+    Dim ClassRange As Range
+    Dim LastRow As Long
+    Dim FolderPath As String
+    Dim CurrentClass As String
+    
+    ' Set the original sheet
+    Set OriginalSheet = ThisWorkbook.Sheets(1)
+    
+    ' Sort data by class
+    OriginalSheet.Sort.SortFields.Clear
+    OriginalSheet.Sort.SortFields.Add Key:=OriginalSheet.Range("A2:A" & LastRow), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    With OriginalSheet.Sort
+        .SetRange Range("A1:Z" & LastRow)
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    
+    ' Find the last row in column A (classes)
+    LastRow = OriginalSheet.Cells(OriginalSheet.Rows.Count, "A").End(xlUp).Row
+    
+    ' Set the range of classes
+    Set ClassRange = OriginalSheet.Range("A2:A" & LastRow)
+    
+    ' Loop through each cell in the range
+    For Each CurrentCell In ClassRange
+        ' If the class is different from the previous one, create a new workbook and sheet
+        If CurrentCell.Value <> CurrentClass Then
+            CurrentClass = CurrentCell.Value
+            
+            ' Check if folder exists, if not, create it
+            FolderPath = "D:\DESKTOP\TEST\" & CurrentClass
+            If Dir(FolderPath, vbDirectory) = "" Then MkDir FolderPath
+            
+            ' Create a new workbook and set the new sheet
+            Set NewWorkbook = Application.Workbooks.Add
+            Set NewSheet = NewWorkbook.Sheets(1)
+            
+            ' Copy the headers to the new sheet
+            OriginalSheet.Rows(1).Copy Destination:=NewSheet.Rows(1)
+        End If
+        
+        ' Copy the current row to the new sheet
+        CurrentCell.EntireRow.Copy Destination:=NewSheet.Cells(NewSheet.Cells(NewSheet.Rows.Count, "A").End(xlUp).Row + 1, 1)
+        
+        ' Save and close the new workbook when all rows of the same class have been copied
+        If CurrentCell.Row = LastRow Or OriginalSheet.Cells(CurrentCell.Row + 1, "A").Value <> CurrentClass Then
+            NewWorkbook.SaveAs FolderPath & "\" & CurrentClass & ".xlsx"
+            NewWorkbook.Close SaveChanges:=False
+        End If
+    Next CurrentCell
+    
+End Sub
