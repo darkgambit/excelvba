@@ -1,0 +1,7 @@
+'insert value in column A, column B will auto clock in
+
+Private Sub Worksheet_Change(ByVal Target As Range)
+    If Target.Column = 1 Then
+        Target.Offset(0, 1).Value = Now
+    End If
+End Sub
