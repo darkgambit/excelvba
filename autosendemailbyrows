@@ -1,0 +1,203 @@
+'auto send email from excel by rows
+
+Sub SendEmail(row As Integer)
+
+    Dim OutApp As Object
+    Dim OutMail As Object
+    Dim ws As Worksheet
+    Dim templateWs As Worksheet
+    Dim rng As Range
+    Dim WordEditor As Object
+
+    Set OutApp = CreateObject("Outlook.Application")
+    Set OutMail = OutApp.CreateItem(0)
+    Set ws = Worksheets("SEND EMAIL")
+    Set templateWs = Worksheets("EmailTemplate")
+
+    ' Check if any of the cells in the row are empty
+    Dim cell As Range
+    For Each cell In ws.Range(ws.Cells(row, "A"), ws.Cells(row, "E"))
+        If IsEmpty(cell) Then
+            MsgBox "The field " & cell.Address & " is required.", vbInformation
+            Exit Sub
+        End If
+    Next cell
+
+    ' Check if an email has already been sent today
+    If ws.Cells(row, "F").Value = Now Then
+        MsgBox "Email Already Sent", vbInformation
+        Exit Sub
+    End If
+
+    Dim filePath As String
+    filePath = ws.Cells(row, "E").Value
+
+    If filePath = "" Or Dir(filePath) = "" Then
+        MsgBox "Attachment not found. Either the link is not found or the attachment cell is empty.", vbInformation
+        Exit Sub
+    End If
+
+    ' Copy the range as a picture
+    Set rng = templateWs.Range("A3:U21")
+    rng.Copy
+
+    On Error Resume Next
+    With OutMail
+        .To = ws.Cells(row, "A").Value
+        .CC = ws.Cells(row, "B").Value
+        .BCC = ""
+        .Subject = ws.Cells(row, "C").Value
+        .Body = "Dear " & ws.Cells(row, "D").Value & "," & vbCrLf & vbCrLf
+        .Attachments.Add filePath
+        .Display   'or use .Send
+
+        ' Paste the copied range into the email body
+        Set WordEditor = .GetInspector.WordEditor
+        WordEditor.Application.Selection.Start = Len(.Body)
+        WordEditor.Application.Selection.End = .Body
+        WordEditor.Application.Selection.PasteAndFormat (wdFormatOriginalFormatting)
+    End With
+    On Error GoTo 0
+
+    ' Update the date when the email was sent
+    ws.Cells(row, "F").Value = Now
+
+    Set OutMail = Nothing
+    Set OutApp = Nothing
+    Set ws = Nothing
+    Set templateWs = Nothing
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sub Button1_Click()
+    SendEmail 2
+End Sub
+
+Sub Button2_Click()
+    SendEmail 3
+End Sub
+Sub Button3_Click()
+    SendEmail 4
+End Sub
+
+Sub Button4_Click()
+    SendEmail 5
+End Sub
+
+Sub Button5_Click()
+    SendEmail 6
+End Sub
+
+Sub Button6_Click()
+    SendEmail 7
+End Sub
+
+Sub Button7_Click()
+    SendEmail 8
+End Sub
+
+Sub Button8_Click()
+    SendEmail 9
+End Sub
+
+Sub Button9_Click()
+    SendEmail 10
+End Sub
+
+Sub Button10_Click()
+    SendEmail 11
+End Sub
+
+Sub Button11_Click()
+    SendEmail 12
+End Sub
+
+Sub Button12_Click()
+    SendEmail 13
+End Sub
+
+Sub Button13_Click()
+    SendEmail 14
+End Sub
+
+Sub Button14_Click()
+    SendEmail 15
+End Sub
+
+
+Sub Button15_Click()
+    SendEmail 16
+End Sub
+
+Sub Button16_Click()
+    SendEmail 17
+End Sub
+Sub Button17_Click()
+    SendEmail 18
+End Sub
+
+Sub Button18_Click()
+    SendEmail 19
+End Sub
+
+Sub Button19_Click()
+    SendEmail 20
+End Sub
+
+Sub Button20_Click()
+    SendEmail 21
+End Sub
+
+Sub Button21_Click()
+    SendEmail 22
+End Sub
+
+Sub Button22_Click()
+    SendEmail 23
+End Sub
+
+Sub Button23_Click()
+    SendEmail 24
+End Sub
+
+Sub Button24_Click()
+    SendEmail 25
+End Sub
+
+Sub Button25_Click()
+    SendEmail 26
+End Sub
+
+Sub Button26_Click()
+    SendEmail 27
+End Sub
+
+Sub Button27_Click()
+    SendEmail 28
+End Sub
+
+Sub Button28_Click()
+    SendEmail 29
+End Sub
+
+
+Sub Button29_Click()
+    SendEmail 30
+End Sub
+
+
+Sub Button30_Click()
+    SendEmail 31
+End Sub
