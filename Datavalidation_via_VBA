@@ -1,0 +1,47 @@
+'Data Validation Using VBA with error on copy and paste)
+
+Private Sub Worksheet_Change(ByVal Target As Range)
+    Dim ws As Worksheet
+    Dim lastRowD As Long
+    Dim lastRowN As Long
+    Dim cell As Range
+    Dim value As Variant
+    Dim firstDuplicateCell As Range
+    Dim isDuplicate As Boolean
+    
+    ' Set the worksheet where your data resides
+    Set ws = ThisWorkbook.Sheets("POB") ' Change "Sheet1" to your actual sheet name
+    
+    ' Find the last used row in both Column D and Column N
+    lastRowD = ws.Cells(ws.Rows.Count, "D").End(xlUp).Row
+    lastRowN = ws.Cells(ws.Rows.Count, "N").End(xlUp).Row
+    
+    ' Check if the change occurred in either Column D or Column N
+    If Not Intersect(Target, Union(ws.Range("D7:D" & lastRowD), ws.Range("N7:N" & lastRowN))) Is Nothing Then
+        ' Loop through each changed cell in the specified ranges
+        For Each cell In Intersect(Target, Union(ws.Range("D7:D" & lastRowD), ws.Range("N7:N" & lastRowN)))
+            If Not IsEmpty(cell.value) Then ' Check if the cell is not empty
+                value = cell.value
+                isDuplicate = False
+                
+                ' Check if the value exists in any cell within the specified ranges
+                For Each checkCell In Union(ws.Range("D7:D" & lastRowD), ws.Range("N7:N" & lastRowN))
+                    If checkCell.value = value And checkCell.Address <> cell.Address Then
+                        isDuplicate = True
+                        Set firstDuplicateCell = checkCell
+                        Exit For
+                    End If
+                Next checkCell
+                
+                If isDuplicate Then
+                    ' If a duplicate is found, show a popup notification
+                    MsgBox "Duplicate Cabin Number in cell " & firstDuplicateCell.Address & ". Please correct it.", vbExclamation, "Duplicate Cabin"
+                    Application.EnableEvents = False ' Disable event handling temporarily
+                    cell.ClearContents ' Clear the duplicate value
+                    Application.EnableEvents = True ' Re-enable event handling
+                    Exit Sub
+                End If
+            End If
+        Next cell
+    End If
+End Sub
