@@ -1,0 +1,63 @@
+' extract pdf link and save in a folder
+
+Sub DownloadPDFsWithSuffix()
+    Dim ws As Worksheet
+    Dim rngLinks As Range
+    Dim cell As Range
+    Dim pdfLink As String
+    Dim savePath As String
+    Dim httpReq As Object
+    Dim adoStream As Object
+    Dim fileName As String
+    Dim suffix As Long
+    
+    ' Set the worksheet where your links and names are
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' Change "Sheet1" to your actual sheet name
+    
+    ' Set the range containing your links (Column D) and names (Column C)
+    Set rngLinks = ws.Range("j2:j" & ws.Cells(ws.Rows.Count, "D").End(xlUp).Row)
+    
+    ' Specify the folder where you want to save the PDFs
+    savePath = "D:\Desktop\pdf save\" ' Change to your desired folder path
+    
+    ' Create an HTTP request object
+    Set httpReq = CreateObject("MSXML2.ServerXMLHTTP.6.0")
+    Set adoStream = CreateObject("ADODB.Stream")
+    
+    ' Loop through each cell in the range
+    For Each cell In rngLinks
+        pdfLink = cell.Value
+        fileName = ws.Cells(cell.Row, "C").Value ' Get the corresponding name from Column C
+        
+        ' Clean up any invalid characters in the filename
+        fileName = Replace(fileName, "\", "_")
+        fileName = Replace(fileName, "/", "_")
+        fileName = Replace(fileName, ":", "_")
+        fileName = Replace(fileName, "?", "_")
+        fileName = Replace(fileName, "*", "_")
+        
+        ' Check if the filename already exists; if so, add a suffix
+        suffix = 1
+        Do While Dir(savePath & fileName & ".pdf") <> ""
+            fileName = ws.Cells(cell.Row, "C").Value & " (" & suffix & ")"
+            suffix = suffix + 1
+        Loop
+        
+        ' Send an HTTP request to download the PDF
+        httpReq.Open "GET", pdfLink, False
+        httpReq.send
+        
+        ' Save the PDF to the specified folder with the modified name
+        If httpReq.Status = 200 Then
+            adoStream.Open
+            adoStream.Type = 1 ' Binary
+            adoStream.Write httpReq.responseBody
+            adoStream.SaveToFile savePath & fileName & ".pdf", 2 ' Overwrite existing file
+            adoStream.Close
+        End If
+    Next cell
+    
+    ' Clean up
+    Set httpReq = Nothing
+    Set adoStream = Nothing
+End Sub
